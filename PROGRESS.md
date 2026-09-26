@@ -95,6 +95,14 @@ the production database change.
   `sql/report_queries.sql` with intentional direct `orders.status` findings,
   plus `src/orders_view_queries.py` with a safe `orders_view` query. No token
   or credential was added to the repository.
+- Confirmed the TrueForge `github` connector is authenticated and exposes
+  `search_code`, `get_file_contents`, and `list_branches`.
+- Added the authenticated read-only GitHub connector to the agent manifest.
+  The agent now scans the fixture repository before database work, writes
+  fetched source into the sandbox, runs a generated scanner, and includes
+  `code_scan` findings in the visible report and sandbox JSON. GitHub write
+  tools remain disabled; `postgres-production.execute_sql` remains the only
+  approval-gated tool.
 
 ## Current filesystem
 
@@ -115,7 +123,8 @@ migration-rehearsal-agent/
 ## Outstanding execution work
 
 1. Apply the updated manifest with `./scripts/upsert-agent.sh` and run one
-   rehearsal to validate the dependency inventory and view-check output.
+   rehearsal to validate GitHub code fetches, code-scan findings, dependency
+   inventory, and view-check output.
 2. Confirm the sandbox execution event is visibly distinct from the staging
    MCP event in the chat transcript.
 3. Reset the fixture to its original seed state before another identical run,

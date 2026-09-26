@@ -25,20 +25,33 @@ instructions: |
   ALTER TABLE orders RENAME COLUMN status TO order_status;
 
   Follow this exact sequence:
-  1. INVENTORY: Via postgres-staging, inspect dependencies before changing
+  1. CODE SCAN: Use the read-only `github` connector before database work. The
+     default fixture is repository `rushil2501/migration-rehearsal-code-scan-fixture`
+     at ref `main`; if the user supplies another owner/repository/ref/path, use
+     those values instead. Use only `search_code`, `get_file_contents`, and
+     `list_branches`; never use GitHub write tools. Search for direct references
+     to `orders.status`, `o.status`, and status in INSERT/UPDATE statements,
+     then fetch the matching files and any relevant SQL/Python/JavaScript/
+     TypeScript files. Write the fetched source files into the sandbox and run a
+     generated read-only scanner that reports repository, ref, file, line,
+     matched text, match kind, and confidence. The sandbox must not connect to
+     GitHub or PostgreSQL. If the repository cannot be accessed, record
+     `code_scan: unavailable` and recommend do not proceed; do not claim the
+     code is clean.
+  2. INVENTORY: Via postgres-staging, inspect dependencies before changing
      anything. Find the attnum for public.orders.status, then query pg_depend
      for matching column-level dependents using pg_describe_object. Also list
      table-level dependents with refobjsubid = 0. Capture object descriptions,
      dependency types, and the orders_view rewrite rule.
-  2. CLONE: Via postgres-staging, DROP SCHEMA IF EXISTS staging CASCADE; CREATE
+  3. CLONE: Via postgres-staging, DROP SCHEMA IF EXISTS staging CASCADE; CREATE
      SCHEMA staging; then copy public.users and public.orders into staging using
      CREATE TABLE staging.<table> AS SELECT * FROM public.<table>. Capture the
      copied row counts. Before the migration, recreate the demo view in staging:
      CREATE VIEW staging.orders_view AS SELECT o.id, o.status, o.total_cents,
      u.email FROM staging.orders o JOIN staging.users u ON u.id = o.user_id.
-  3. REHEARSE: Via postgres-staging only, run ALTER TABLE staging.orders RENAME
+  4. REHEARSE: Via postgres-staging only, run ALTER TABLE staging.orders RENAME
      COLUMN status TO order_status; Capture whether it succeeds.
-  4. VERIFY: Via postgres-staging only, run BOTH checks. First run this
+  5. VERIFY: Via postgres-staging only, run BOTH checks. First run this
      dependent-query equivalent:
      SELECT o.id, o.status, o.total_cents, u.email FROM staging.orders o JOIN
      staging.users u ON u.id = o.user_id LIMIT 1; Capture its exact success or
@@ -47,29 +60,34 @@ instructions: |
      order_status while retaining the view output column name status; report
      that result separately. The sandbox has no network access: never connect to
      the database from it. Then write and execute a Python script in the sandbox
-     using the dependency inventory, row counts, migration result, direct-query
-     result, and view result already gathered. The script must print structured
-     JSON containing migration, dependencies, direct_query_check, view_check,
-     errors, and recommendation. Do not produce that report by chat reasoning
-     alone.
-  5. REPORT: State whether the migration applied, list affected dependent
-     objects, distinguish direct SQL failures from actual view behavior, include
-     exact errors, and give a clear recommendation. Recommend updating direct
-     SQL/application code when it still uses o.status, even if orders_view
-     passes. The sandbox JSON is evidence, not a substitute for the visible
-     report: before requesting approval, repeat the dependency list, the direct
-     query result with its exact error, the actual view result, and the
-     recommendation in a concise assistant message. Do not jump directly from
-     sandbox execution to the approval gate without this user-visible report.
-  6. GATE: Regardless of the rehearsal result, say that you are requesting
+     using the code-scan findings, dependency inventory, row counts, migration
+     result, direct-query result, and view result already gathered. The script
+     must print structured JSON containing code_scan, migration, dependencies,
+     direct_query_check, view_check, errors, and recommendation. Do not produce
+     that report by chat reasoning alone.
+  6. REPORT: State whether the migration applied, list code-scan findings and
+     affected database dependents, distinguish direct SQL failures from actual
+     view behavior, include exact errors, and give a clear recommendation.
+     Recommend updating direct SQL/application code when it still uses o.status,
+     even if orders_view passes. The sandbox JSON is evidence, not a substitute
+     for the visible report: before requesting approval, repeat the code-scan
+     findings, dependency list, direct query result with its exact error, actual
+     view result, and recommendation in a concise assistant message. Do not
+     jump directly from sandbox execution to the approval gate without this
+     user-visible report.
+  7. GATE: Regardless of the rehearsal result, say that you are requesting
      approval to apply to production public because it is the only irreversible
      step; staging and sandbox work are disposable. Then invoke the exact same
      migration using postgres-production. Never call postgres-production before
      all prior steps finish.
-  7. APPLY: After TrueForge approval, run the statement against public and
+  8. APPLY: After TrueForge approval, run the statement against public and
      report success or failure.
 
 mcp_servers:
+  - name: github
+    preload: true
+    enable_tools: ["search_code", "get_file_contents", "list_branches"]
+    require_approval_for_tools: []
   - name: postgres-staging
     preload: true
     enable_tools: ["@all"]

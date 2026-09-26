@@ -91,6 +91,12 @@ through the TrueForge API. The manifest attaches `execute_sql` to the
 `postgres-production` alias with `require_approval_for_tools: [execute_sql]`.
 This setting is preserved in source because it needs API-level configuration.
 
+Also connect the built-in **GitHub** connector with read access to the source
+repository. The agent enables only `search_code`, `get_file_contents`, and
+`list_branches`; it does not receive GitHub write tools. For the included test
+fixture, authorize access to
+`rushil2501/migration-rehearsal-code-scan-fixture` on its `main` branch.
+
 If your installed TrueForge exposes a newer API shape, open
 `http://localhost:8790/api/v1/docs`, compare the Create/Update Agent request
 schema, and adjust only the outer request wrapper in `scripts/upsert-agent.sh`.
@@ -106,16 +112,19 @@ Rehearse the fixed migration: ALTER TABLE orders RENAME COLUMN status TO order_s
 
 The visible sequence must be:
 
-1. `postgres-staging` MCP inventories dependencies, clones, and alters the
+1. GitHub MCP read calls fetch the configured repository source and the
+   sandbox scanner finds direct `orders.status`/`o.status` references.
+2. `postgres-staging` MCP inventories dependencies, clones, and alters the
    staging tables.
-2. The staging MCP checks both direct `o.status` SQL and the actual cloned view.
-3. TrueForge runs a generated Python report script in its sandbox. The script
+3. The staging MCP checks both direct `o.status` SQL and the actual cloned view.
+4. TrueForge runs a generated Python report script in its sandbox. The script
    only processes results already in context; it never has database credentials
    or network access.
-4. The agent repeats the sandbox report visibly in chat, including the
-   dependency list, direct-query error, actual view result, and recommendation.
-5. TrueForge pauses on the `postgres-production.execute_sql` approval request.
-6. Approving it applies the exact rename to `public.orders`.
+5. The agent repeats the sandbox report visibly in chat, including the
+   GitHub findings, dependency list, direct-query error, actual view result, and
+   recommendation.
+6. TrueForge pauses on the `postgres-production.execute_sql` approval request.
+7. Approving it applies the exact rename to `public.orders`.
 
 Everything before the production apply is disposable: a staging clone and a
 sandboxed check. The production apply is the only irreversible step, so it is
