@@ -27,24 +27,45 @@ instructions: |
   Follow this exact sequence:
   1. CODE SCAN: First parse the migration supplied in the user request. For the
      supported rename form, ALTER TABLE [schema.]table RENAME COLUMN old TO new,
-     extract schema, table, old_column, and new_column. Never hardcode
-     identifiers from the demo. If the migration cannot be
-     parsed or is outside this supported form, record
-     `code_scan: unsupported_migration`, explain why, and recommend do not
-     proceed; do not search using guessed identifiers. Use the read-only
-     `github` connector before database work. The default fixture is repository
-     `rushil2501/migration-rehearsal-code-scan-fixture` at ref `main`; if the
-     user supplies another owner/repository/ref/path, use those values instead.
-     Use only `search_code`, `get_file_contents`, and `list_branches`; never use
-     GitHub write tools. Generate GitHub searches from the extracted old column
-     and table names, fetch matching files and relevant SQL/Python/JavaScript/
-     TypeScript files, and classify only contextual references to the target
-     table/column, aliases, or DML column lists. Write fetched source files into
-     the sandbox and run a generated read-only scanner that reports the parsed
-     migration target, repository, ref, file, line, matched text, match kind,
-     and confidence. The sandbox must not connect to GitHub or PostgreSQL. If
-     the repository cannot be accessed, record `code_scan: unavailable` and
-     recommend do not proceed; do not claim the code is clean.
+     extract schema, table, old_column, and new_column. Derive ALL scan patterns
+     from these parsed identifiers; never use demo identifiers as scan rules. If
+     the migration cannot be parsed or is outside this supported form, report
+     `code_scan.status: unsupported_migration` and recommend do not proceed.
+     The default repository is `rushil2501/migration-rehearsal-code-scan-fixture`
+     at ref `main`; honor a user-supplied owner/repo/ref/path instead.
+
+     Run a Python Code Mode script in the TrueForge sandbox BEFORE database
+     work. Import `call_tool` from `mcp_client` and call ONLY the read-only
+     `github.get_file_contents` MCP tool through it. The call is bridged through
+     TrueForge's authenticated connector; do not put a GitHub token in the
+     sandbox or make direct HTTP requests. Start with the repository root (or
+     user-supplied path), recursively list directories, and fetch source files
+     at the requested ref. Do not use GitHub code search to decide coverage:
+     search can return `incomplete_results: true` with zero matches. Ignore
+     download_url fields. Do not pass a file blob SHA as the `sha` argument.
+
+     IMPORTANT: `get_file_contents` for a file may return a text block saying
+     "successfully downloaded text file" PLUS an embedded MCP `resource` block.
+     The text block is only an acknowledgment, not source. In the Code Mode
+     script inspect the full `call_tool` result; when it is a list of content
+     blocks, extract the file body from a block with `type == "resource"` and
+     `resource.text`. Also accept an actual text/content body if the connector
+     returns one. Never treat an acknowledgment or SHA as scanned source. If
+     no source bytes are present, record that file as unreadable and mark the
+     scan partial or unavailable.
+
+     Inspect relevant .sql, .py, .js, .jsx, .ts, .tsx, .go, .java, .rb, .php,
+     .rs, .kt, and .cs files; skip generated/vendor directories. Set a bounded
+     scan limit (for example 200 files and 2 MiB of source) and report any
+     skipped files. Find old-column references in SQL statements tied to the
+     parsed table, including its aliases and INSERT/UPDATE column lists.
+     Distinguish proven direct table references from ambiguous matches and
+     references to a view that may retain its output column. Print JSON with
+     migration_target, repository, ref, status, files_enumerated,
+     files_scanned, unreadable/skipped files, and findings with path, line,
+     matched text, match kind, and confidence. A zero-finding scan is complete
+     only if all in-scope source was actually read. If source cannot be read,
+     report `code_scan.status: unavailable` or `partial`, never "clean".
   2. INVENTORY: Via postgres-staging, inspect dependencies before changing
      anything. Find the attnum for public.orders.status, then query pg_depend
      for matching column-level dependents using pg_describe_object. Also list
@@ -65,8 +86,8 @@ instructions: |
      error. Then run the actual cloned view check: SELECT * FROM
      staging.orders_view LIMIT 1. PostgreSQL may rewrite the view dependency to
      order_status while retaining the view output column name status; report
-     that result separately. The sandbox has no network access: never connect to
-     the database from it. Then write and execute a Python script in the sandbox
+     that result separately. Never connect to the database from the sandbox.
+     Then write and execute a Python script in the sandbox
      using the code-scan findings, dependency inventory, row counts, migration
      result, direct-query result, and view result already gathered. The script
      must print structured JSON containing migration_target, code_scan, migration, dependencies,
@@ -75,7 +96,8 @@ instructions: |
   6. REPORT: State whether the migration applied, list code-scan findings and
      affected database dependents, distinguish direct SQL failures from actual
      view behavior, include exact errors, and give a clear recommendation.
-     Recommend updating direct SQL/application code when it still uses o.status,
+     Recommend updating direct SQL/application code when it still uses the old
+     column from the parsed migration,
      even if orders_view passes. The sandbox JSON is evidence, not a substitute
      for the visible report: before requesting approval, repeat the code-scan
      findings, dependency list, direct query result with its exact error, actual
@@ -93,7 +115,7 @@ instructions: |
 mcp_servers:
   - name: github
     preload: true
-    enable_tools: ["search_code", "get_file_contents", "list_branches"]
+    enable_tools: ["get_file_contents"]
     require_approval_for_tools: []
   - name: postgres-staging
     preload: true

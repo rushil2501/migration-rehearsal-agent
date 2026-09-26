@@ -18,8 +18,10 @@ the production database change.
   `orders.status`.
 - The staging verification must reproduce the view query against staging tables
   after the rename; it must error because `o.status` is absent.
-- The sandbox does no network/database work. It builds the JSON report from
-  MCP results already in the model context.
+- The sandbox does no direct network/database work. The Code Mode script calls
+  the read-only GitHub MCP connector through TrueForge's harness bridge; MCP
+  credentials stay in the harness. The report script uses already gathered
+  GitHub-scan and database MCP results.
 - Use two TrueForge connector aliases to the same MCP server: un-gated
   `postgres-staging` and approval-gated `postgres-production`.
 - The sole gate is the final production `public.orders` ALTER. The agent must
@@ -98,15 +100,35 @@ the production database change.
 - Confirmed the TrueForge `github` connector is authenticated and exposes
   `search_code`, `get_file_contents`, and `list_branches`.
 - Added the authenticated read-only GitHub connector to the agent manifest.
-  The agent now scans the fixture repository before database work, writes
-  fetched source into the sandbox, runs a generated scanner, and includes
-  `code_scan` findings in the visible report and sandbox JSON. GitHub write
-  tools remain disabled; `postgres-production.execute_sql` remains the only
-  approval-gated tool.
+  The intended workflow scans the fixture repository before database work and
+  includes `code_scan` findings in the visible report and sandbox JSON. GitHub
+  write tools remain disabled; `postgres-production.execute_sql` remains the
+  only approval-gated tool.
 - Removed hardcoded `orders.status`/`o.status` code-scan patterns. The agent now
   parses the requested rename migration first and derives table, old-column,
   and new-column search rules. Unsupported migration syntax is reported as
   `code_scan: unsupported_migration` rather than scanned with guessed names.
+- Diagnosed session `01m3efcpby47a4dc64ntv9efm2` (saved agent reference,
+  second turn pending production approval): GitHub search returned
+  `incomplete_results: true` with zero items despite the fixture being
+  listable. Direct `get_file_contents` of individual files put only
+  `successfully downloaded text file (SHA: ...)` acknowledgments into the
+  assistant-visible tool response. The agent incorrectly looked for files in
+  the sandbox, where none were written, and marked the scan unavailable. The
+  staging clone, migration, direct-SQL failure, and cloned-view success were
+  otherwise correct. No production approval was given in this session.
+- Updated the manifest to use TrueForge Code Mode for GitHub file retrieval and
+  scan. A sandbox Python script calls `github.get_file_contents` through
+  `mcp_client`, where the full MCP result can expose the embedded `resource`
+  block containing source text. It walks repository directories instead of
+  relying on GitHub search, ignores the acknowledgment and download URLs,
+  records file/line findings and coverage, and marks unreadable or skipped
+  source as partial/unavailable. Only `get_file_contents` is enabled on the
+  GitHub connector. TrueForge documents that Code Mode MCP calls are bridged
+  through the harness with credentials kept out of the sandbox:
+  https://trueforge.dev/key-features/code-mode . GitHub documents the
+  acknowledgment plus embedded resource response format:
+  https://github.com/github/github-mcp-server/issues/607 .
 
 ## Current filesystem
 
@@ -126,9 +148,12 @@ migration-rehearsal-agent/
 
 ## Outstanding execution work
 
-1. Apply the updated manifest with `./scripts/upsert-agent.sh` and run one
-   rehearsal to validate GitHub code fetches, code-scan findings, dependency
-   inventory, and view-check output.
+1. Apply the updated manifest with `./scripts/upsert-agent.sh`. Start a NEW
+   saved-agent session for the next rehearsal; existing sessions keep their
+   original agent configuration. Confirm the Code Mode output includes actual
+   source-backed file/line findings and `files_scanned > 0`. If it still
+   reports an acknowledgment without a `resource.text` body, inspect the
+   full Code Mode result shape and adapt the reader; do not claim a clean scan.
 2. Confirm the sandbox execution event is visibly distinct from the staging
    MCP event in the chat transcript.
 3. Reset the fixture to its original seed state before another identical run,
@@ -144,8 +169,9 @@ migration-rehearsal-agent/
 - `crystaldba/postgres-mcp` must expose the SQL tool as `execute_sql`, as the
   specification states. Verify this in the connector tool list before applying
   the manifest.
-- The local sandbox behavior and lack of egress are constraints supplied by the
-  spec. The agent prompt explicitly prevents network use in the sandbox.
+- The sandbox has no direct network egress in this workflow. Code Mode routes
+  read-only GitHub MCP calls through the TrueForge harness; it must never call
+  the PostgreSQL connector from the sandbox or receive the GitHub token.
 - The container image may require a platform pull on the first Docker run.
 - The environment is active. The only source addition carrying its live ngrok
   URL is `.env`, which is gitignored. The agent is registered and ready for its

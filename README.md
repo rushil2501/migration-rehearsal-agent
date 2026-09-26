@@ -92,8 +92,8 @@ through the TrueForge API. The manifest attaches `execute_sql` to the
 This setting is preserved in source because it needs API-level configuration.
 
 Also connect the built-in **GitHub** connector with read access to the source
-repository. The agent enables only `search_code`, `get_file_contents`, and
-`list_branches`; it does not receive GitHub write tools. For the included test
+repository. The agent enables only `get_file_contents`; it does not receive
+GitHub write tools. For the included test
 fixture, authorize access to
 `rushil2501/migration-rehearsal-code-scan-fixture` on its `main` branch.
 
@@ -113,14 +113,17 @@ Rehearse the fixed migration: ALTER TABLE orders RENAME COLUMN status TO order_s
 The visible sequence must be:
 
 1. The agent parses the requested rename and derives the old table/column
-   identifiers. GitHub MCP read calls fetch the configured repository source,
-   and the sandbox scanner finds contextual references to those derived values.
+   identifiers. A TrueForge Code Mode script walks the configured repository
+   through the authenticated GitHub MCP connector, reads the source bodies,
+   and reports file/line findings plus scan coverage. It marks missing source
+   or exceeded scan limits as partial or unavailable.
 2. `postgres-staging` MCP inventories dependencies, clones, and alters the
    staging tables.
 3. The staging MCP checks both direct `o.status` SQL and the actual cloned view.
-4. TrueForge runs a generated Python report script in its sandbox. The script
-   only processes results already in context; it never has database credentials
-   or network access.
+4. TrueForge runs a generated Python report script in its sandbox. It uses the
+   code-scan results and database MCP results gathered earlier; it never has
+   database credentials or direct network access. Code Mode GitHub calls are
+   bridged through the TrueForge harness, which holds the connector credential.
 5. The agent repeats the sandbox report visibly in chat, including the
    GitHub findings, dependency list, direct-query error, actual view result, and
    recommendation.
