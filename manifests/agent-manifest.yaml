@@ -1,5 +1,5 @@
-# Apply this document through scripts/upsert-agent.sh after registering both
-# connector aliases in TrueForge. The agent name and description are API fields;
+# Apply this document through scripts/upsert-agent.sh after registering the
+# connectors and git-backed skill in TrueForge. Name and description are API fields;
 # connector URLs never belong in this file.
 
 model:
@@ -23,6 +23,11 @@ instructions: |
 
   This demo supports exactly this migration:
   ALTER TABLE orders RENAME COLUMN status TO order_status;
+
+  Load the attached `migration-rehearsal-evidence` skill before CODE SCAN and
+  follow its statement-level classification and reporting checklist. If the
+  skill cannot be loaded, report that limitation and continue with the steps
+  below; do not claim the skill was used.
 
   Follow this exact sequence:
   1. CODE SCAN: First parse the migration supplied in the user request. For the
@@ -136,6 +141,9 @@ mcp_servers:
     preload: true
     enable_tools: ["execute_sql"]
     require_approval_for_tools: ["execute_sql"]
+
+skills:
+  - name: migration-rehearsal-evidence
 
 config:
   iteration_limit: 25
