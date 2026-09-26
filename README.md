@@ -1,0 +1,142 @@
+# Migration Rehearsal Agent
+
+A focused TrueForge hackathon demo. It inventories PostgreSQL dependencies,
+rehearses one schema migration in a disposable `staging` schema, checks both
+direct dependent SQL and the actual cloned view, creates the report through
+actual TrueForge sandbox execution, and lets TrueForge pause for human approval
+before it changes `public`.
+
+> TrueForge owns the agent loop, MCP tool-calling, the sandbox, and the
+> approval-gate mechanism. This repository supplies the migration-rehearsal
+> domain logic: what to clone, what check proves the migration is safe, and
+> which single step needs a human sign-off.
+
+## Fixed scenario
+
+The production schema contains `users`, `orders`, and `orders_view`.
+`orders_view` selects `orders.status`. The agent rehearses:
+
+```sql
+ALTER TABLE orders RENAME COLUMN status TO order_status;
+```
+
+PostgreSQL accepts the rename. A direct dependent query against
+`staging.orders` then fails because `status` no longer exists. PostgreSQL can
+rewrite the actual view dependency to `order_status` while preserving the
+view's output name as `status`, so the agent checks and reports those two cases
+separately before requesting approval to run the same statement against
+`public.orders`.
+
+## Prerequisites
+
+- Docker Desktop and Docker Compose
+- [ngrok](https://ngrok.com/) authenticated locally
+- Node.js 22.14 or later for TrueForge
+- `curl`, [`jq`](https://jqlang.org/), and Ruby (bundled with current macOS)
+- A model provider configured in TrueForge
+
+## Start the demo database and MCP server
+
+```bash
+cd migration-rehearsal-agent
+cp .env.example .env
+docker compose up -d
+docker compose ps
+ngrok http 8000 --request-header-add "ngrok-skip-browser-warning: true"
+```
+
+Keep ngrok running and copy its HTTPS forwarding URL into `NGROK_MCP_URL` in
+`.env`. Do not commit `.env`: its ngrok URL changes on every restart.
+
+The Compose fixture initializes exactly 300 `users`, 500 `orders`, and the
+dependent view. To recreate it from a known state before a rehearsal:
+
+```bash
+./scripts/reset-demo.sh
+```
+
+That command removes only the Compose-managed `migration-demo` fixture and its
+volume, then creates a fresh fixture from `db/init.sql`.
+
+## Configure TrueForge
+
+Start TrueForge in a second terminal:
+
+```bash
+npx @truefoundry/trueforge@latest --port 8790
+```
+
+At `http://localhost:8790` configure a model provider, then add **two Remote
+MCP Server connectors** under **Settings → Connectors**. Both use the same
+HTTPS ngrok URL and require no authentication:
+
+| Connector name | URL | Agent use |
+| --- | --- | --- |
+| `postgres-staging` | `${NGROK_MCP_URL}` | disposable clone, rehearsal, verification |
+| `postgres-production` | `${NGROK_MCP_URL}` | final public-schema apply only |
+
+The duplicate connectors are intentional. They point at the same physical
+MCP server but let the agent manifest give the production alias a distinct,
+enforced approval rule.
+
+Set `TRUEFORGE_MODEL` in `.env` to the configured model identifier shown by
+`GET http://localhost:8790/api/v1/models`, then apply the manifest:
+
+```bash
+./scripts/upsert-agent.sh
+```
+
+The script checks whether the saved agent exists, then creates or updates it
+through the TrueForge API. The manifest attaches `execute_sql` to the
+`postgres-production` alias with `require_approval_for_tools: [execute_sql]`.
+This setting is preserved in source because it needs API-level configuration.
+
+If your installed TrueForge exposes a newer API shape, open
+`http://localhost:8790/api/v1/docs`, compare the Create/Update Agent request
+schema, and adjust only the outer request wrapper in `scripts/upsert-agent.sh`.
+The nested `manifest` is the source of truth.
+
+## Run the agent
+
+Open the **migration-rehearsal-agent** in the TrueForge chat UI and send:
+
+```text
+Rehearse the fixed migration: ALTER TABLE orders RENAME COLUMN status TO order_status;
+```
+
+The visible sequence must be:
+
+1. `postgres-staging` MCP inventories dependencies, clones, and alters the
+   staging tables.
+2. The staging MCP checks both direct `o.status` SQL and the actual cloned view.
+3. TrueForge runs a generated Python report script in its sandbox. The script
+   only processes results already in context; it never has database credentials
+   or network access.
+4. TrueForge pauses on the `postgres-production.execute_sql` approval request.
+5. Approving it applies the exact rename to `public.orders`.
+
+Everything before the production apply is disposable: a staging clone and a
+sandboxed check. The production apply is the only irreversible step, so it is
+the only one that pauses.
+
+## Demo notes
+
+For the five-minute presentation, point to three separate TrueForge UI events:
+the staging MCP call, the sandbox script execution, and the approval pause.
+After approving, reset the fixture before repeating the demo.
+
+## Repository layout
+
+| Path | Purpose |
+| --- | --- |
+| `compose.yaml` | PostgreSQL and `crystaldba/postgres-mcp` local stack |
+| `db/init.sql` | exact schema and deterministic 300/500-row seed |
+| `manifests/agent-manifest.yaml` | source-controlled TrueForge agent configuration and instructions |
+| `scripts/upsert-agent.sh` | API create/update helper for the approval configuration |
+| `scripts/reset-demo.sh` | fresh demo fixture reset |
+| `PROGRESS.md` | complete handoff context and current implementation state |
+
+## AI-assistant disclosure
+
+This project was implemented with OpenAI Codex as an AI coding assistant.
+The author reviewed the generated configuration, prompts, and documentation.
