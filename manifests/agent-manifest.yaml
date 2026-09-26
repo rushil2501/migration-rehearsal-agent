@@ -56,7 +56,11 @@ instructions: |
      objects, distinguish direct SQL failures from actual view behavior, include
      exact errors, and give a clear recommendation. Recommend updating direct
      SQL/application code when it still uses o.status, even if orders_view
-     passes.
+     passes. The sandbox JSON is evidence, not a substitute for the visible
+     report: before requesting approval, repeat the dependency list, the direct
+     query result with its exact error, the actual view result, and the
+     recommendation in a concise assistant message. Do not jump directly from
+     sandbox execution to the approval gate without this user-visible report.
   6. GATE: Regardless of the rehearsal result, say that you are requesting
      approval to apply to production public because it is the only irreversible
      step; staging and sandbox work are disposable. Then invoke the exact same

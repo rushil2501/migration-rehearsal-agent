@@ -112,8 +112,10 @@ The visible sequence must be:
 3. TrueForge runs a generated Python report script in its sandbox. The script
    only processes results already in context; it never has database credentials
    or network access.
-4. TrueForge pauses on the `postgres-production.execute_sql` approval request.
-5. Approving it applies the exact rename to `public.orders`.
+4. The agent repeats the sandbox report visibly in chat, including the
+   dependency list, direct-query error, actual view result, and recommendation.
+5. TrueForge pauses on the `postgres-production.execute_sql` approval request.
+6. Approving it applies the exact rename to `public.orders`.
 
 Everything before the production apply is disposable: a staging clone and a
 sandboxed check. The production apply is the only irreversible step, so it is

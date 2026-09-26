@@ -76,6 +76,11 @@ the production database change.
   `staging.orders_view`, and verify direct dependent SQL separately from the
   actual view. Reports now distinguish a failed direct `o.status` query from a
   view that PostgreSQL rewrites successfully.
+- Inspected session `01m3ecx08fed1my6qs2akenpkq`: the new inventory ran, the
+  direct `o.status` check returned the expected missing-column error, the
+  actual cloned view check passed, and the sandbox JSON contained both results.
+  Added an instruction requiring the assistant to repeat that report visibly
+  before the approval gate because the first updated run condensed it too much.
 
 ## Current filesystem
 
