@@ -136,9 +136,15 @@ the only one that pauses.
 
 ## Demo notes
 
-For the five-minute presentation, point to three separate TrueForge UI events:
-the staging MCP call, the sandbox script execution, and the approval pause.
-After approving, reset the fixture before repeating the demo.
+In the TrueForge segment, point to three separate UI events: the staging MCP
+call, the sandbox script execution, and the approval pause. If you approve on
+the disposable fixture, reset it before repeating the demo.
+
+For a three-minute video, open the self-contained
+[90-second slide deck](demo/presentation.html) and follow the
+[video run-of-show](demo/README.md). The deck covers the problem, architecture,
+and observed result in three slides; the remaining 90 seconds show the actual
+TrueForge session.
 
 ## Repository layout
 
@@ -149,6 +155,8 @@ After approving, reset the fixture before repeating the demo.
 | `manifests/agent-manifest.yaml` | source-controlled TrueForge agent configuration and instructions |
 | `scripts/upsert-agent.sh` | API create/update helper for the approval configuration |
 | `scripts/reset-demo.sh` | fresh demo fixture reset |
+| `demo/presentation.html` | self-contained three-slide video presentation |
+| `demo/README.md` | three-minute recording sequence and presenter instructions |
 | `PROGRESS.md` | complete handoff context and current implementation state |
 
 ## AI-assistant disclosure

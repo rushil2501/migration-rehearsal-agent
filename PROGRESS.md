@@ -166,6 +166,14 @@ the production database change.
   default branch. Verified the remote `main` commit matches local `d356511`
   immediately after creation. `.env` is ignored, has never been tracked, and
   a history scan found no GitHub token, OpenAI key, or ngrok tunnel URL pattern.
+- Added a self-contained three-slide HTML presentation in
+  `demo/presentation.html` for the first 90 seconds of a three-minute video.
+  It shows the rename risk and direct/view distinction, the TrueForge/GitHub/
+  PostgreSQL MCP/sandbox/approval architecture, and the observed rehearsal
+  evidence. The deck includes keyboard navigation, full-screen mode, and
+  hidden speaker notes. `demo/README.md` provides a timed 90-second TrueForge
+  walkthrough using a session already at the approval gate. The video still
+  needs to be recorded; no new agent rehearsal was run for this artifact.
 
 ## Current filesystem
 
@@ -177,6 +185,9 @@ migration-rehearsal-agent/
 ├── PROGRESS.md
 ├── compose.yaml
 ├── db/init.sql
+├── demo/
+│   ├── presentation.html
+│   └── README.md
 ├── manifests/agent-manifest.yaml
 └── scripts/
     ├── reset-demo.sh
@@ -196,7 +207,10 @@ migration-rehearsal-agent/
    checklist calls for two full end-to-end rehearsals before the live demo;
    the latest user-run report stopped at the approval gate, while an earlier
    configuration did complete a production apply.
-4. Submission packaging: the project repository is public, but the default
+4. Record the three-minute video using `demo/presentation.html` for the first
+   90 seconds and the timed TrueForge walkthrough in `demo/README.md` for the
+   remaining 90 seconds.
+5. Submission packaging: the project repository is public, but the default
    GitHub code-scan fixture is private. A stranger following the README cannot
    access that fixture without being granted permission. Make the fixture
    publicly accessible or include a self-contained way to create an equivalent
