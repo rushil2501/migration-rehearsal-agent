@@ -78,6 +78,15 @@
     .section-label { color: var(--muted); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; font-weight: 800; }
     .slide-head { display: flex; flex-direction: column; gap: 12px; }
     .slide-head .subhead { max-width: 990px; }
+    .intro-title-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+    .intro-title-row h1 { flex: 1; min-width: 0; }
+    .builder {
+      width: 260px; flex: none; display: grid; gap: 5px;
+      padding: 12px 0 12px 18px; border-left: 2px solid var(--lime);
+      background: linear-gradient(90deg, #bfff7010, transparent);
+    }
+    .builder strong { font-size: clamp(19px, 1.7vw, 27px); line-height: 1.1; letter-spacing: -.035em; }
+    .builder span:last-child { color: var(--muted); font-size: 13px; line-height: 1.3; }
 
     /* Slide 1: the issue, with the database and application outcomes kept separate. */
     .problem-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 22px; min-height: 0; flex: 1; }
@@ -169,6 +178,8 @@
       .slide { gap: 15px; padding: 20px 0; }
       h1 { font-size: clamp(35px, 5vw, 53px); }
       h2 { font-size: clamp(31px, 4vw, 46px); }
+      .builder { width: 205px; }
+      .builder span:last-child { font-size: 11px; }
       .subhead { font-size: 15px; }
       .problem-grid { gap: 12px; }
       .flow { gap: 7px; }
@@ -188,6 +199,10 @@
       .problem-story { padding: 20px; gap: 12px; }
       .problem-story .big-fact { font-size: clamp(22px, 2.3vw, 34px); }
       .terminal-content { padding: 20px; gap: 15px; }
+    }
+    @media (max-width: 700px) {
+      .intro-title-row { flex-wrap: wrap; gap: 12px; }
+      .builder { width: auto; padding: 7px 0 7px 12px; }
     }
     @media (max-height: 700px) {
       .deck { grid-template-rows: 58px minmax(0, 1fr) 54px; }
@@ -213,7 +228,14 @@
       <section class="slide enter" id="slide-1" aria-label="Slide 1: the problem">
         <div class="slide-head">
           <div class="eyebrow">01 / The problem · 0:00–0:30</div>
-          <h1>The ALTER passes.<br><span class="lime">The app still breaks.</span></h1>
+          <div class="intro-title-row">
+            <h1>The ALTER passes.<br><span class="lime">The app still breaks.</span></h1>
+            <div class="builder" aria-label="Built by Rushil Shah, Software Engineer at Visa Inc">
+              <span class="section-label">Built by</span>
+              <strong>Rushil Shah</strong>
+              <span>Software Engineer · Visa Inc</span>
+            </div>
+          </div>
           <p class="subhead">A column rename can be valid SQL and still leave application queries using the old name.</p>
         </div>
         <div class="problem-grid">
@@ -309,7 +331,7 @@
   <script>
     const slides = [...document.querySelectorAll('.slide')];
     const notes = [
-      "Imagine renaming orders.status to order_status. PostgreSQL accepts the ALTER, but application SQL that still selects o.status fails. Our fixture has 500 orders and 300 users. One subtlety matters: PostgreSQL rewrites the dependent view, so orders_view still works and still exposes status. The agent has to report direct SQL and view behavior separately.",
+      "I'm Rushil Shah, a software engineer at Visa Inc. Imagine renaming orders.status to order_status. PostgreSQL accepts the ALTER, but application SQL that still selects o.status fails. Our fixture has 500 orders and 300 users. One subtlety matters: PostgreSQL rewrites the dependent view, so orders_view still works and still exposes status. The agent has to report direct SQL and view behavior separately.",
       "Our GPT-5.6 Sol agent scans GitHub source for references derived from the proposed rename. It inventories PostgreSQL dependencies, clones tables into disposable staging, runs the migration there, and checks direct SQL and the view. TrueForge performs the GitHub and crystaldba/postgres-mcp calls, runs the Python JSON report script in its sandbox, and enforces approval on the production SQL alias.",
       "TrueForge gives us the agent loop, session trace, sandbox execution, and enforced approval, so the agent needs no custom orchestrator. GitHub and PostgreSQL MCP connectors provide real source and database evidence; two Postgres aliases gate only production SQL. The evidence checklist lives in the agent manifest today; a git-backed TrueForge skill could make it reusable later. Codex helped build the manifest, Docker fixture, scripts, and this presentation, with human review. Now let’s inspect the live trace."
     ];

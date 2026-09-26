@@ -183,6 +183,9 @@ the production database change.
   that the interrupted registration did not create a skill. The slide clearly
   labels skill packaging as a future extension; it does not claim a skill ran
   in the observed rehearsal.
+- Added a visible “Built by” attribution on slide 1 for Rushil Shah,
+  Software Engineer at Visa Inc, and included a brief spoken introduction in
+  the slide's presenter notes.
 
 ## Current filesystem
 
