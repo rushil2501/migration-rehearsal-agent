@@ -257,8 +257,8 @@
       <section class="slide" id="slide-3" aria-label="Slide 3: implementation details and live demo" hidden>
         <div class="slide-head">
           <div class="eyebrow">03 / Under the hood · 1:00–1:30</div>
-          <h2>Built with the harness. <span class="lime">Ready to reuse.</span></h2>
-          <p class="subhead">TrueForge supplies execution and control; MCPs and a versioned skill supply the migration procedure.</p>
+          <h2>Built with the harness. <span class="lime">Ready to extend.</span></h2>
+          <p class="subhead">TrueForge supplies execution and control; MCPs supply live evidence; skills offer a reusable next step.</p>
         </div>
         <div class="stack-grid">
           <div class="panel stack-card">
@@ -276,11 +276,11 @@
             <div class="stack-payoff">Real tools, scoped access</div>
           </div>
           <div class="panel stack-card">
-            <div class="section-label">03 / Procedure</div>
-            <h3 class="violet">TrueForge skill</h3>
-            <p>Git-backed <code>SKILL.md</code> runbook.</p>
-            <ul class="stack-points"><li>Statement-scoped code scan</li><li>Direct SQL vs view classification</li><li>Evidence + report checklist</li></ul>
-            <div class="stack-payoff">Loaded when relevant</div>
+            <div class="section-label">03 / Extension</div>
+            <h3 class="violet">Skills-ready</h3>
+            <p>Package the manifest's runbook as a git-backed <code>SKILL.md</code>.</p>
+            <ul class="stack-points"><li>Statement-scoped scan rules</li><li>Direct SQL vs view checklist</li><li>Would load on demand</li></ul>
+            <div class="stack-payoff">Proposed next step</div>
           </div>
           <div class="panel stack-card">
             <div class="section-label">04 / Build process</div>
@@ -290,7 +290,7 @@
             <div class="stack-payoff">Disclosed in README</div>
           </div>
         </div>
-        <div class="handoff"><div><b>Now open the live TrueForge session.</b><br><span>Show the skill, MCP calls, sandbox JSON, and approval gate.</span></div><strong>Live demo → 1:30</strong></div>
+        <div class="handoff"><div><b>Now open the live TrueForge session.</b><br><span>Show the MCP calls, sandbox JSON, and approval gate.</span></div><strong>Live demo → 1:30</strong></div>
       </section>
 
       <aside class="notes-panel" id="notes-panel" aria-live="polite" hidden>
@@ -311,7 +311,7 @@
     const notes = [
       "Imagine renaming orders.status to order_status. PostgreSQL accepts the ALTER, but application SQL that still selects o.status fails. Our fixture has 500 orders and 300 users. One subtlety matters: PostgreSQL rewrites the dependent view, so orders_view still works and still exposes status. The agent has to report direct SQL and view behavior separately.",
       "Our GPT-5.6 Sol agent scans GitHub source for references derived from the proposed rename. It inventories PostgreSQL dependencies, clones tables into disposable staging, runs the migration there, and checks direct SQL and the view. TrueForge performs the GitHub and crystaldba/postgres-mcp calls, runs the Python JSON report script in its sandbox, and enforces approval on the production SQL alias.",
-      "TrueForge gives us the agent loop, session trace, sandbox execution, and enforced approval, so the agent needs no custom orchestrator. GitHub and PostgreSQL MCP connectors provide real source and database evidence; two Postgres aliases gate only the production SQL. A git-backed skill packages the code-classification and report checklist for reuse. Codex helped build the manifest, Docker fixture, scripts, and this presentation, with human review. Now let’s inspect the live TrueForge trace."
+      "TrueForge gives us the agent loop, session trace, sandbox execution, and enforced approval, so the agent needs no custom orchestrator. GitHub and PostgreSQL MCP connectors provide real source and database evidence; two Postgres aliases gate only production SQL. The evidence checklist lives in the agent manifest today; a git-backed TrueForge skill could make it reusable later. Codex helped build the manifest, Docker fixture, scripts, and this presentation, with human review. Now let’s inspect the live trace."
     ];
     let current = 0;
     const count = document.getElementById('slide-count');

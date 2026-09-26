@@ -168,12 +168,21 @@ the production database change.
   a history scan found no GitHub token, OpenAI key, or ngrok tunnel URL pattern.
 - Added a self-contained three-slide HTML presentation in
   `demo/presentation.html` for the first 90 seconds of a three-minute video.
-  It shows the rename risk and direct/view distinction, the TrueForge/GitHub/
-  PostgreSQL MCP/sandbox/approval architecture, and the observed rehearsal
-  evidence. The deck includes keyboard navigation, full-screen mode, and
+  It shows the rename risk and direct/view distinction, the agent workflow,
+  and implementation details: TrueForge harness, GitHub/PostgreSQL MCPs,
+  Codex, and skills as a proposed extension. The deck includes keyboard
+  navigation, full-screen mode, and
   hidden speaker notes. `demo/README.md` provides a timed 90-second TrueForge
   walkthrough using a session already at the approval gate. The video still
   needs to be recorded; no new agent rehearsal was run for this artifact.
+- At the user's request, revised slide 3 to focus on implementation. An
+  intermediate commit (`0334cc9`) briefly added a git-backed skill file and
+  manifest reference. The user narrowed the task to presentation content, so
+  the current branch removed the skill file, registration script, and agent
+  manifest reference. A read-only check of local TrueForge settings confirmed
+  that the interrupted registration did not create a skill. The slide clearly
+  labels skill packaging as a future extension; it does not claim a skill ran
+  in the observed rehearsal.
 
 ## Current filesystem
 
