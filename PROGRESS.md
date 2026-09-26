@@ -47,7 +47,7 @@ the production database change.
   `crystaldba/postgres-mcp` running. The MCP server is exposed via the ngrok
   SSE endpoint recorded in the ignored `.env` file.
 - Confirmed the local TrueForge instance at port 8790 is version 0.2.1, has its
-  sandbox capability enabled, and has `openai/gpt-5-5` configured.
+  sandbox capability enabled, and has OpenAI models configured.
 - Created the `postgres-staging` and `postgres-production` connector aliases
   through TrueForge Settings API. Both point at the same existing MCP URL and
   report `not_required` authentication.
@@ -143,6 +143,10 @@ the production database change.
   statement, and keep view-output references distinct from direct breakages.
   The current reported recommendation to update direct application SQL before
   production apply remains correct. No approval was given in this review.
+- Updated the project model setting to TrueForge's configured
+  `openai/gpt-5-6-sol` ID in ignored `.env` and tracked `.env.example`, then
+  republished the saved agent manifest. New sessions should use this model;
+  existing sessions retain their original agent configuration.
 
 ## Current filesystem
 
