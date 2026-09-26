@@ -161,6 +161,11 @@ the production database change.
   `o.status`), and "three references" should say "three affected statements,
   four old-column occurrences" because the SQL report query uses `o.status`
   in both SELECT and WHERE.
+- Published the project as a PUBLIC GitHub repository at
+  `https://github.com/rushil2501/migration-rehearsal-agent` with `main` as its
+  default branch. Verified the remote `main` commit matches local `d356511`
+  immediately after creation. `.env` is ignored, has never been tracked, and
+  a history scan found no GitHub token, OpenAI key, or ngrok tunnel URL pattern.
 
 ## Current filesystem
 
@@ -191,13 +196,12 @@ migration-rehearsal-agent/
    checklist calls for two full end-to-end rehearsals before the live demo;
    the latest user-run report stopped at the approval gate, while an earlier
    configuration did complete a production apply.
-4. Submission packaging: this project has no Git remote yet, so its required
-   public repository has not been published. The default GitHub code-scan
-   fixture is private; a stranger following the README cannot access it
-   without being granted permission. Make the fixture publicly accessible or
-   include a self-contained way to create an equivalent fixture before
-   claiming the README works from a fresh clone. Publishing or changing repo
-   visibility requires the user's decision.
+4. Submission packaging: the project repository is public, but the default
+   GitHub code-scan fixture is private. A stranger following the README cannot
+   access that fixture without being granted permission. Make the fixture
+   publicly accessible or include a self-contained way to create an equivalent
+   fixture before claiming the README works from a fresh clone. Changing the
+   fixture's visibility requires the user's decision.
 
 ## Assumptions and risks to verify
 
