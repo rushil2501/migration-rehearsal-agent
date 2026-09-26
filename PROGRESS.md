@@ -87,6 +87,14 @@ the production database change.
   transaction and rolled it back, so it did not exercise dependency inventory,
   sandbox reporting, or the production approval gate. A `try_agent_name` URL
   parameter does not rebind an existing session.
+- Validated the ignored `.env` `GITHUB_TOKEN` against GitHub successfully as
+  user `rushil2501` without printing the token.
+- Created private fixture repository
+  `https://github.com/rushil2501/migration-rehearsal-code-scan-fixture` on the
+  `main` branch. It contains `src/orders_queries.py` and
+  `sql/report_queries.sql` with intentional direct `orders.status` findings,
+  plus `src/orders_view_queries.py` with a safe `orders_view` query. No token
+  or credential was added to the repository.
 
 ## Current filesystem
 
