@@ -112,8 +112,9 @@ Rehearse the fixed migration: ALTER TABLE orders RENAME COLUMN status TO order_s
 
 The visible sequence must be:
 
-1. GitHub MCP read calls fetch the configured repository source and the
-   sandbox scanner finds direct `orders.status`/`o.status` references.
+1. The agent parses the requested rename and derives the old table/column
+   identifiers. GitHub MCP read calls fetch the configured repository source,
+   and the sandbox scanner finds contextual references to those derived values.
 2. `postgres-staging` MCP inventories dependencies, clones, and alters the
    staging tables.
 3. The staging MCP checks both direct `o.status` SQL and the actual cloned view.

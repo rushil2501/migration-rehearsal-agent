@@ -103,6 +103,10 @@ the production database change.
   `code_scan` findings in the visible report and sandbox JSON. GitHub write
   tools remain disabled; `postgres-production.execute_sql` remains the only
   approval-gated tool.
+- Removed hardcoded `orders.status`/`o.status` code-scan patterns. The agent now
+  parses the requested rename migration first and derives table, old-column,
+  and new-column search rules. Unsupported migration syntax is reported as
+  `code_scan: unsupported_migration` rather than scanned with guessed names.
 
 ## Current filesystem
 
