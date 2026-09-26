@@ -57,10 +57,19 @@ instructions: |
      Inspect relevant .sql, .py, .js, .jsx, .ts, .tsx, .go, .java, .rb, .php,
      .rs, .kt, and .cs files; skip generated/vendor directories. Set a bounded
      scan limit (for example 200 files and 2 MiB of source) and report any
-     skipped files. Find old-column references in SQL statements tied to the
-     parsed table, including its aliases and INSERT/UPDATE column lists.
-     Distinguish proven direct table references from ambiguous matches and
-     references to a view that may retain its output column. Print JSON with
+     skipped files. Split SQL files and SQL embedded in application strings
+     into individual statements before classifying any match. Bind table
+     aliases and resolve unqualified columns using FROM/JOIN/UPDATE/INSERT
+     relations in THAT SAME statement. Never carry relation context across a
+     semicolon, a separate string, a comment, or another statement in the file.
+     Mark a reference high-confidence breaking only when that statement uses
+     the parsed target table or an alias bound to it. A statement that reads a
+     dependent view but not the target table is an indirect view-output
+     reference, NOT a direct table break; compare it with the later cloned-view
+     check before saying whether it survives. If the relation is unclear,
+     classify the match as ambiguous rather than high confidence. Keep direct
+     break candidates, view-output references, and ambiguous matches distinct.
+     Print JSON with
      migration_target, repository, ref, status, files_enumerated,
      files_scanned, unreadable/skipped files, and findings with path, line,
      matched text, match kind, and confidence. A zero-finding scan is complete
@@ -95,7 +104,9 @@ instructions: |
      that report by chat reasoning alone.
   6. REPORT: State whether the migration applied, list code-scan findings and
      affected database dependents, distinguish direct SQL failures from actual
-     view behavior, include exact errors, and give a clear recommendation.
+     view behavior, include exact errors, and give a clear recommendation. Do
+     not list view-output references among direct breakages when the cloned
+     view retains that output column.
      Recommend updating direct SQL/application code when it still uses the old
      column from the parsed migration,
      even if orders_view passes. The sandbox JSON is evidence, not a substitute

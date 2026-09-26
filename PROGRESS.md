@@ -129,6 +129,20 @@ the production database change.
   https://trueforge.dev/key-features/code-mode . GitHub documents the
   acknowledgment plus embedded resource response format:
   https://github.com/github/github-mcp-server/issues/607 .
+- The next user-run rehearsal reported a complete code scan of 3/3 fixture
+  files, with actual file/line findings, plus the expected staging migration,
+  direct-query failure, and cloned-view success. This confirms the Code Mode
+  source retrieval path worked in that run. Review found one classification
+  error: `sql/report_queries.sql:7` was marked a high-confidence direct
+  unqualified table reference, but its SQL statement is `SELECT ... status ...
+  FROM orders_view;` and therefore uses the view output. The separate
+  `src/orders_view_queries.py:4` finding was correctly identified as a view
+  output reference. The direct table findings at `sql/report_queries.sql:2,4`
+  and `src/orders_queries.py:14,25` are valid. Updated the prompt to split SQL
+  into statements, bind aliases and unqualified columns only within each
+  statement, and keep view-output references distinct from direct breakages.
+  The current reported recommendation to update direct application SQL before
+  production apply remains correct. No approval was given in this review.
 
 ## Current filesystem
 
@@ -150,10 +164,9 @@ migration-rehearsal-agent/
 
 1. Apply the updated manifest with `./scripts/upsert-agent.sh`. Start a NEW
    saved-agent session for the next rehearsal; existing sessions keep their
-   original agent configuration. Confirm the Code Mode output includes actual
-   source-backed file/line findings and `files_scanned > 0`. If it still
-   reports an acknowledgment without a `resource.text` body, inspect the
-   full Code Mode result shape and adapt the reader; do not claim a clean scan.
+   original agent configuration. Confirm `sql/report_queries.sql:7` is labeled
+   view-output usage and excluded from direct breakages. The source-retrieval
+   path was already confirmed in the user-run 3/3-file rehearsal.
 2. Confirm the sandbox execution event is visibly distinct from the staging
    MCP event in the chat transcript.
 3. Reset the fixture to its original seed state before another identical run,
