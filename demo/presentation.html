@@ -88,28 +88,36 @@
     .builder strong { font-size: clamp(19px, 1.7vw, 27px); line-height: 1.1; letter-spacing: -.035em; }
     .builder span:last-child { color: var(--muted); font-size: 13px; line-height: 1.3; }
 
-    /* Slide 1: the issue, with the database and application outcomes kept separate. */
-    .problem-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 22px; min-height: 0; flex: 1; }
-    .problem-story { padding: clamp(25px, 3vw, 45px); display: flex; flex-direction: column; justify-content: space-between; gap: 22px; }
-    .big-fact { font-size: clamp(24px, 2.7vw, 43px); line-height: 1.12; font-weight: 770; max-width: 620px; letter-spacing: -.04em; }
-    .big-fact strong { color: var(--red); }
+    /* Slide 1: lead with the problem, then show the compact migration example. */
+    .problem-context {
+      padding: clamp(18px, 2vw, 30px); display: grid; grid-template-columns: minmax(210px, .52fr) 1fr;
+      gap: clamp(20px, 3vw, 48px); align-items: center; flex: 1; min-height: 0;
+      border-color: #67dded55; background: linear-gradient(105deg, #133046e8, #101b2bdb);
+    }
+    .problem-context h3 { margin-top: 12px; color: var(--cyan); font-size: clamp(24px, 2.5vw, 40px); line-height: 1.08; letter-spacing: -.045em; }
+    .problem-context p { color: #d7e5f2; font-size: clamp(16px, 1.2vw, 20px); line-height: 1.43; max-width: 850px; }
+    .problem-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 22px; min-height: 0; height: clamp(230px, 29vh, 330px); flex: none; }
+    .problem-story { padding: clamp(20px, 2vw, 30px); display: flex; flex-direction: column; justify-content: center; gap: clamp(10px, 1.5vh, 18px); }
+    .big-fact { font-size: clamp(23px, 2.35vw, 36px); line-height: 1.14; font-weight: 770; max-width: 620px; letter-spacing: -.04em; }
+    .problem-support { color: #d1deeb; font-size: clamp(14px, 1.15vw, 18px); line-height: 1.35; }
+    .problem-support strong { color: var(--red); }
     .fact-row { display: flex; gap: 11px; flex-wrap: wrap; }
-    .fact-chip { padding: 10px 13px; border: 1px solid #ffffff24; border-radius: 10px; color: #d5e1ed; font-size: 13px; font-weight: 720; background: #ffffff09; }
+    .fact-chip { padding: 7px 10px; border: 1px solid #ffffff24; border-radius: 10px; color: #d5e1ed; font-size: 12px; font-weight: 720; background: #ffffff09; }
     .fact-chip b { color: var(--lime); }
     .terminal { overflow: hidden; display: flex; flex-direction: column; }
-    .terminal-bar { padding: 17px 21px; display: flex; gap: 8px; align-items: center; border-bottom: 1px solid var(--line); color: #b3c4d8; font-size: 12px; font-weight: 750; }
+    .terminal-bar { padding: 11px 17px; display: flex; gap: 8px; align-items: center; border-bottom: 1px solid var(--line); color: #b3c4d8; font-size: 11px; font-weight: 750; }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: #496279; }
     .dot:first-child { background: var(--red); }
     .dot:nth-child(2) { background: var(--amber); }
     .dot:nth-child(3) { background: var(--lime); margin-right: 12px; }
-    .terminal-content { padding: clamp(18px, 2vw, 32px); display: flex; flex-direction: column; justify-content: center; gap: 22px; flex: 1; }
-    .sql-block { display: grid; gap: 8px; }
+    .terminal-content { padding: clamp(16px, 1.7vw, 26px); display: flex; flex-direction: column; justify-content: center; gap: clamp(10px, 1.3vh, 16px); flex: 1; }
+    .sql-block { display: grid; gap: 6px; }
     .sql-block code, .status-line code, .mini-code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-    .sql-block code { color: #e6f0fc; font-size: clamp(15px, 1.35vw, 22px); line-height: 1.6; overflow-wrap: anywhere; }
+    .sql-block code { color: #e6f0fc; font-size: clamp(14px, 1.2vw, 19px); line-height: 1.4; overflow-wrap: anywhere; }
     .sql-block em { color: var(--amber); font-style: normal; }
-    .status-line { border-top: 1px solid var(--line); padding-top: 18px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; font-size: 15px; }
+    .status-line { border-top: 1px solid var(--line); padding-top: 10px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; font-size: 13px; }
     .status-line span:first-child { color: #cad8e8; }
-    .outcome { font-size: 11px; font-weight: 850; padding: 7px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: .11em; }
+    .outcome { font-size: 10px; font-weight: 850; padding: 6px 8px; border-radius: 8px; text-transform: uppercase; letter-spacing: .08em; }
     .outcome.bad { color: var(--red); background: #ff8d8e21; }
     .outcome.good { color: var(--lime); background: #bfff701b; }
 
@@ -181,6 +189,9 @@
       .builder { width: 205px; }
       .builder span:last-child { font-size: 11px; }
       .subhead { font-size: 15px; }
+      .problem-context { grid-template-columns: minmax(170px, .43fr) 1fr; gap: 16px; }
+      .problem-context h3 { font-size: 23px; }
+      .problem-context p { font-size: 14px; }
       .problem-grid { gap: 12px; }
       .flow { gap: 7px; }
       .step { padding: 14px; gap: 8px; }
@@ -196,9 +207,17 @@
     }
     @media (max-height: 800px) {
       h1 { font-size: clamp(42px, 4.3vw, 60px); }
-      .problem-story { padding: 20px; gap: 12px; }
-      .problem-story .big-fact { font-size: clamp(22px, 2.3vw, 34px); }
-      .terminal-content { padding: 20px; gap: 15px; }
+      .problem-context { padding: 15px 20px; }
+      .problem-context h3 { margin-top: 6px; font-size: 22px; }
+      .problem-context p { font-size: 14px; line-height: 1.32; }
+      .problem-story { padding: 17px; gap: 9px; }
+      .problem-story .big-fact { font-size: clamp(20px, 2.1vw, 30px); }
+      .problem-support { font-size: 13px; }
+      .fact-chip { padding: 6px 8px; font-size: 11px; }
+      .terminal-content { padding: 14px; gap: 9px; }
+      .sql-block code { font-size: 14px; }
+      .status-line { padding-top: 7px; font-size: 11px; }
+      .outcome { font-size: 9px; padding: 5px 7px; }
     }
     @media (max-width: 700px) {
       .intro-title-row { flex-wrap: wrap; gap: 12px; }
@@ -210,6 +229,10 @@
       h1 { font-size: clamp(40px, 4.3vw, 67px); }
       h2 { font-size: clamp(34px, 3.5vw, 54px); }
       .problem-story, .stack-card { padding: 17px; }
+      .problem-grid { height: clamp(220px, 34vh, 270px); }
+      .problem-context { padding: 12px 16px; }
+      .problem-context p { font-size: 12px; line-height: 1.28; }
+      .problem-context h3 { font-size: 19px; }
       .step { gap: 8px; }
       .step-icon { width: 34px; height: 34px; font-size: 19px; }
       .trust-cell { padding: 11px 15px; }
@@ -236,13 +259,17 @@
               <span>Software Engineer · Visa Inc</span>
             </div>
           </div>
-          <p class="subhead">A column rename can be valid SQL and still leave application queries using the old name.</p>
+          <p class="subhead">A valid database migration can still break consumers of the old schema.</p>
+        </div>
+        <div class="panel problem-context">
+          <div><div class="section-label">Why rehearsal matters</div><h3>Passing DDL is only the first signal.</h3></div>
+          <p>PostgreSQL accepting a migration does not prove that code using the old schema will work. Services, reports, and integrations may still reference changed objects. Here, a dependent view survives the rename while a direct query fails. The agent checks both before a person decides on the public-schema change.</p>
         </div>
         <div class="problem-grid">
           <div class="panel problem-story">
             <div class="section-label">The migration under test</div>
-            <div class="big-fact">Rename <span class="cyan">orders.status</span> to <span class="lime">orders.order_status</span>.</div>
-            <div class="big-fact">Staging DDL succeeds. A direct <strong>o.status</strong> query fails.</div>
+            <div class="big-fact"><span class="cyan">orders.status</span> → <span class="lime">orders.order_status</span></div>
+            <p class="problem-support">The staging rename succeeds; a direct <strong>o.status</strong> query fails.</p>
             <div class="fact-row"><span class="fact-chip"><b>500</b> orders</span><span class="fact-chip"><b>300</b> users</span><span class="fact-chip">Disposable <b>staging</b> clone</span></div>
           </div>
           <div class="panel terminal">
@@ -331,7 +358,7 @@
   <script>
     const slides = [...document.querySelectorAll('.slide')];
     const notes = [
-      "I'm Rushil Shah, a software engineer at Visa Inc. Imagine renaming orders.status to order_status. PostgreSQL accepts the ALTER, but application SQL that still selects o.status fails. Our fixture has 500 orders and 300 users. One subtlety matters: PostgreSQL rewrites the dependent view, so orders_view still works and still exposes status. The agent has to report direct SQL and view behavior separately.",
+      "I'm Rushil Shah, a software engineer at Visa Inc. A migration can pass in PostgreSQL while services, reports, or integrations still depend on the old schema. Our example renames orders.status to order_status. The ALTER succeeds, but SQL selecting o.status fails. PostgreSQL rewrites the dependent view, so orders_view still works. We rehearse both paths on 500 orders and 300 users before asking anyone to approve the public-schema change.",
       "Our GPT-5.6 Sol agent scans GitHub source for references derived from the proposed rename. It inventories PostgreSQL dependencies, clones tables into disposable staging, runs the migration there, and checks direct SQL and the view. TrueForge performs the GitHub and crystaldba/postgres-mcp calls, runs the Python JSON report script in its sandbox, and enforces approval on the production SQL alias.",
       "TrueForge gives us the agent loop, session trace, sandbox execution, and enforced approval, so the agent needs no custom orchestrator. GitHub and PostgreSQL MCP connectors provide real source and database evidence; two Postgres aliases gate only production SQL. The evidence checklist lives in the agent manifest today; a git-backed TrueForge skill could make it reusable later. Codex helped build the manifest, Docker fixture, scripts, and this presentation, with human review. Now let’s inspect the live trace."
     ];
