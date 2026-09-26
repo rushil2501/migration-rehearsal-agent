@@ -81,6 +81,12 @@ the production database change.
   actual cloned view check passed, and the sandbox JSON contained both results.
   Added an instruction requiring the assistant to repeat that report visibly
   before the approval gate because the first updated run condensed it too much.
+- Diagnosed session `01m3edj7xe51d94hsqw2ncw28z`: it is bound to an inline
+  legacy agent (`agent.type = inline`) with the single `postgres-mcp` connector,
+  not the saved `migration-rehearsal-agent` reference. It ran a public-schema
+  transaction and rolled it back, so it did not exercise dependency inventory,
+  sandbox reporting, or the production approval gate. A `try_agent_name` URL
+  parameter does not rebind an existing session.
 
 ## Current filesystem
 
