@@ -140,7 +140,6 @@
     .stack-card:nth-child(4) { border-top-color: var(--amber); }
     .stack-card h3 { font-size: clamp(23px, 2vw, 31px); line-height: 1.08; letter-spacing: -.04em; }
     .stack-card p { color: #c1cfdf; font-size: clamp(13px, 1.05vw, 17px); line-height: 1.42; }
-    .stack-card code { overflow-wrap: anywhere; }
     .stack-points { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
     .stack-points li { color: #d5e0ea; font-size: clamp(12px, .95vw, 15px); line-height: 1.32; padding-left: 14px; position: relative; }
     .stack-points li::before { content: "•"; color: var(--lime); position: absolute; left: 0; }
@@ -280,8 +279,8 @@
       <section class="slide" id="slide-3" aria-label="Slide 3: implementation details and live demo" hidden>
         <div class="slide-head">
           <div class="eyebrow">03 / Under the hood · 1:00–1:30</div>
-          <h2>Built with the harness. <span class="lime">Ready to reuse.</span></h2>
-          <p class="subhead">TrueForge supplies execution and control; MCPs and an attached skill supply a repeatable migration procedure.</p>
+          <h2>Built with the harness. <span class="lime">Ready to extend.</span></h2>
+          <p class="subhead">TrueForge supplies execution and control; MCPs supply live evidence; skills offer a reusable next step.</p>
         </div>
         <div class="stack-grid">
           <div class="panel stack-card">
@@ -299,11 +298,11 @@
             <div class="stack-payoff">Real tools, scoped access</div>
           </div>
           <div class="panel stack-card">
-            <div class="section-label">03 / Runbook</div>
-            <h3 class="violet">TrueForge skill</h3>
-            <p>Attached git-backed <code>migration-rehearsal-evidence</code>.</p>
-            <ul class="stack-points"><li>Statement-scoped scan rules</li><li>Direct SQL vs view checklist</li><li>Evidence + JSON report contract</li></ul>
-            <div class="stack-payoff">Reusable, loaded on demand</div>
+            <div class="section-label">03 / Extension</div>
+            <h3 class="violet">Skills-ready</h3>
+            <p>Package the manifest's runbook as a git-backed <code>SKILL.md</code>.</p>
+            <ul class="stack-points"><li>Statement-scoped scan rules</li><li>Direct SQL vs view checklist</li><li>Would load on demand</li></ul>
+            <div class="stack-payoff">Proposed next step</div>
           </div>
           <div class="panel stack-card">
             <div class="section-label">04 / Build process</div>
@@ -334,7 +333,7 @@
     const notes = [
       "I'm Rushil Shah, a software engineer at Visa Inc. Imagine renaming orders.status to order_status. PostgreSQL accepts the ALTER, but application SQL that still selects o.status fails. Our fixture has 500 orders and 300 users. One subtlety matters: PostgreSQL rewrites the dependent view, so orders_view still works and still exposes status. The agent has to report direct SQL and view behavior separately.",
       "Our GPT-5.6 Sol agent scans GitHub source for references derived from the proposed rename. It inventories PostgreSQL dependencies, clones tables into disposable staging, runs the migration there, and checks direct SQL and the view. TrueForge performs the GitHub and crystaldba/postgres-mcp calls, runs the Python JSON report script in its sandbox, and enforces approval on the production SQL alias.",
-      "TrueForge gives us the agent loop, session trace, sandbox execution, and enforced approval, so the agent needs no custom orchestrator. GitHub and PostgreSQL MCP connectors provide real source and database evidence; two Postgres aliases gate only production SQL. Our attached migration-rehearsal-evidence skill packages statement-scoped scan rules and the JSON report checklist for reuse. Codex helped build the manifest, Docker fixture, scripts, and this presentation, with human review. Now let’s inspect the live trace."
+      "TrueForge gives us the agent loop, session trace, sandbox execution, and enforced approval, so the agent needs no custom orchestrator. GitHub and PostgreSQL MCP connectors provide real source and database evidence; two Postgres aliases gate only production SQL. The evidence checklist lives in the agent manifest today; a git-backed TrueForge skill could make it reusable later. Codex helped build the manifest, Docker fixture, scripts, and this presentation, with human review. Now let’s inspect the live trace."
     ];
     let current = 0;
     const count = document.getElementById('slide-count');

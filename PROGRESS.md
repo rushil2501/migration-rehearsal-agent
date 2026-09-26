@@ -186,6 +186,15 @@ the production database change.
 - Added a visible “Built by” attribution on slide 1 for Rushil Shah,
   Software Engineer at Visa Inc, and included a brief spoken introduction in
   the slide's presenter notes.
+- A later attempt to make the slide's skill claim real briefly republished a
+  git-backed `migration-rehearsal-evidence` skill and registered it in local
+  TrueForge. The user stopped the agent update and said the integration was
+  unnecessary. Read-only checks confirmed the saved agent has no attached
+  skills (`skills: null`), while the skill remains registered but unattached
+  in TrueForge Settings. The working tree was restored to the presentation-only
+  state from commit `aec0177`; the deck labels skills as a proposed extension.
+  The local TrueForge API exposes skill list/create/replace, but no supported
+  delete endpoint, so the inert registry entry was left alone.
 
 ## Current filesystem
 

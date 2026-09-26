@@ -80,11 +80,9 @@ MCP server but let the agent manifest give the production alias a distinct,
 enforced approval rule.
 
 Set `TRUEFORGE_MODEL` in `.env` to the configured model identifier shown by
-`GET http://localhost:8790/api/v1/models`. Register the git-backed evidence
-skill from this public repository, then apply the manifest:
+`GET http://localhost:8790/api/v1/models`, then apply the manifest:
 
 ```bash
-./scripts/upsert-skill.sh
 ./scripts/upsert-agent.sh
 ```
 
@@ -92,9 +90,6 @@ The script checks whether the saved agent exists, then creates or updates it
 through the TrueForge API. The manifest attaches `execute_sql` to the
 `postgres-production` alias with `require_approval_for_tools: [execute_sql]`.
 This setting is preserved in source because it needs API-level configuration.
-The attached [migration evidence skill](skills/migration-rehearsal-evidence/SKILL.md)
-is a reusable runbook for source classification, dependency checks, and report
-structure. TrueForge loads skills through the sandbox when relevant.
 
 Also connect the built-in **GitHub** connector with read access to the source
 repository. The agent enables only `get_file_contents`; it does not receive
@@ -117,8 +112,7 @@ Rehearse the fixed migration: ALTER TABLE orders RENAME COLUMN status TO order_s
 
 The visible sequence must be:
 
-1. The agent loads its evidence skill, parses the requested rename, and derives
-   the old table/column
+1. The agent parses the requested rename and derives the old table/column
    identifiers. A TrueForge Code Mode script walks the configured repository
    through the authenticated GitHub MCP connector, reads the source bodies,
    and reports file/line findings plus scan coverage. It marks missing source
@@ -150,7 +144,8 @@ For a three-minute video, open the self-contained
 [90-second slide deck](demo/presentation.html) and follow the
 [video run-of-show](demo/README.md). The deck covers the problem, workflow,
 and implementation stack in three slides; the remaining 90 seconds show the
-actual TrueForge session. The skills card names the attached evidence skill.
+actual TrueForge session. The skills card describes a proposed extension; the
+current agent keeps its checklist in the manifest.
 
 ## Repository layout
 
@@ -160,9 +155,7 @@ actual TrueForge session. The skills card names the attached evidence skill.
 | `db/init.sql` | exact schema and deterministic 300/500-row seed |
 | `manifests/agent-manifest.yaml` | source-controlled TrueForge agent configuration and instructions |
 | `scripts/upsert-agent.sh` | API create/update helper for the approval configuration |
-| `scripts/upsert-skill.sh` | register the git-backed evidence skill |
 | `scripts/reset-demo.sh` | fresh demo fixture reset |
-| `skills/migration-rehearsal-evidence/SKILL.md` | source classification and reporting runbook |
 | `demo/presentation.html` | self-contained three-slide video presentation |
 | `demo/README.md` | three-minute recording sequence and presenter instructions |
 | `PROGRESS.md` | complete handoff context and current implementation state |
