@@ -16,8 +16,10 @@ the production database change.
 - Support exactly `ALTER TABLE orders RENAME COLUMN status TO order_status;`.
 - Public schema: `users`, `orders`, and `orders_view`, which selects
   `orders.status`.
-- The staging verification must reproduce the view query against staging tables
-  after the rename; it must error because `o.status` is absent.
+- The staging verification runs direct SQL against the renamed table and the
+  actual cloned view separately. Direct `o.status` SQL errors; PostgreSQL
+  rewrites the dependent view and retains its output column `status`. This
+  corrects the original spec's mistaken claim that the view itself must fail.
 - The sandbox does no direct network/database work. The Code Mode script calls
   the read-only GitHub MCP connector through TrueForge's harness bridge; MCP
   credentials stay in the harness. The report script uses already gathered
@@ -58,9 +60,9 @@ the production database change.
   `postgres-production`.
 - Updated the live agent to disable dynamic subagents and generative UI, keeping
   the fixed demo narrow. Verified both aliases discover `execute_sql`.
-- Read-only database validation passed: `users` has 300 rows, `orders` has 500
-  rows, and `orders_view` currently selects `o.status`; it is ready to show the
-  failure after the staging rename.
+- Read-only database validation passed: `users` had 300 rows, `orders` had 500
+  rows, and the starting `orders_view` selected `o.status`. The staging rename
+  later demonstrated the direct-query failure and preserved view output.
 - The live chat completed the rehearsal and displayed the real approval request
   for `postgres-production.execute_sql`; submitting the approval resumed the
   turn successfully.
@@ -147,6 +149,18 @@ the production database change.
   `openai/gpt-5-6-sol` ID in ignored `.env` and tracked `.env.example`, then
   republished the saved agent manifest. New sessions should use this model;
   existing sessions retain their original agent configuration.
+- The latest user-run report after the statement-level classification update
+  showed 4 repository files enumerated and 3 in-scope source files read, with
+  no unreadable or limit-skipped source. It correctly separated 3 affected
+  direct SQL statements from 2 `orders_view` output references and classified
+  `status: str` as ambiguous. The `staging` rename succeeded, the direct query
+  failed with SQLSTATE 42703, the cloned view passed, and the production
+  approval gate was reached. The user has not reported approving that gate.
+  Minor report precision issues remain: the `src/orders_queries.py` SELECT
+  was cited at line 13 (opening string) instead of line 14 (the actual
+  `o.status`), and "three references" should say "three affected statements,
+  four old-column occurrences" because the SQL report query uses `o.status`
+  in both SELECT and WHERE.
 
 ## Current filesystem
 
@@ -161,38 +175,44 @@ migration-rehearsal-agent/
 ├── manifests/agent-manifest.yaml
 └── scripts/
     ├── reset-demo.sh
+    ├── upsert-connectors.sh
     └── upsert-agent.sh
 ```
 
-## Outstanding execution work
+## Remaining work
 
-1. Apply the updated manifest with `./scripts/upsert-agent.sh`. Start a NEW
-   saved-agent session for the next rehearsal; existing sessions keep their
-   original agent configuration. Confirm `sql/report_queries.sql:7` is labeled
-   view-output usage and excluded from direct breakages. The source-retrieval
-   path was already confirmed in the user-run 3/3-file rehearsal.
-2. Confirm the sandbox execution event is visibly distinct from the staging
-   MCP event in the chat transcript.
-3. Reset the fixture to its original seed state before another identical run,
-   then complete a second end-to-end rehearsal before the presentation.
+1. Optional report precision: ask the agent to anchor each finding to the
+   exact line containing the old column and to count affected statements
+   separately from individual old-column occurrences.
+2. For demo evidence, confirm the TrueForge UI visibly shows a PostgreSQL MCP
+   call, sandbox script execution, and the enforced production approval pause
+   as distinct events. The latest report text alone does not prove UI events.
+3. Reset the fixture before another identical run. The original submission
+   checklist calls for two full end-to-end rehearsals before the live demo;
+   the latest user-run report stopped at the approval gate, while an earlier
+   configuration did complete a production apply.
+4. Submission packaging: this project has no Git remote yet, so its required
+   public repository has not been published. The default GitHub code-scan
+   fixture is private; a stranger following the README cannot access it
+   without being granted permission. Make the fixture publicly accessible or
+   include a self-contained way to create an equivalent fixture before
+   claiming the README works from a fresh clone. Publishing or changing repo
+   visibility requires the user's decision.
 
 ## Assumptions and risks to verify
 
-- The spec says an AgentManifest YAML is accepted by `GET/PUT /api/v1/agents`.
-  Current TrueForge documentation also describes an API request with a `name`
-  plus nested `manifest`; `upsert-agent.sh` uses that current wrapper. Inspect
-  the local `/api/v1/docs` before first use. If it differs, change only the
-  `payload` construction in that script.
-- `crystaldba/postgres-mcp` must expose the SQL tool as `execute_sql`, as the
-  specification states. Verify this in the connector tool list before applying
-  the manifest.
+- The original spec's sample AgentManifest shape differs from the installed
+  TrueForge API. `upsert-agent.sh` uses the accepted nested `manifest` wrapper
+  and has successfully updated the saved agent repeatedly.
+- `crystaldba/postgres-mcp` exposes `execute_sql`, already verified in the
+  connector tool list and live runs.
 - The sandbox has no direct network egress in this workflow. Code Mode routes
   read-only GitHub MCP calls through the TrueForge harness; it must never call
   the PostgreSQL connector from the sandbox or receive the GitHub token.
 - The container image may require a platform pull on the first Docker run.
-- The environment is active. The only source addition carrying its live ngrok
-  URL is `.env`, which is gitignored. The agent is registered and ready for its
-  first end-to-end UI run.
+- The live ngrok URL is in ignored `.env`; do not commit it. The saved agent
+  has run multiple rehearsals, including one approved production apply under
+  an earlier configuration.
 
 ## Handoff commands
 
